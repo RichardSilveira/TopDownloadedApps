@@ -4,6 +4,7 @@ import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.ListView;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -15,17 +16,19 @@ import java.net.URL;
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
+    private ListView listApps;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        listApps = (ListView) findViewById(R.id.xmlListView);
         DownloadFeed downloadFeed = new DownloadFeed();
-        downloadFeed.execute("http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/topfreeapplications/limit=10/xml");
+        downloadFeed.execute("http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/topfreeapplications/limit=200/xml");
     }
 
-    private class DownloadFeed extends AsyncTask<String, Void, String> {
+        private class DownloadFeed extends AsyncTask<String, Void, String> {
 
         @Override
         protected String doInBackground(String... strings) {
@@ -47,6 +50,9 @@ public class MainActivity extends AppCompatActivity {
 
             ParseApplications applications = new ParseApplications();
             applications.parse(s);
+
+            FeedAdapter feedAdapter = new FeedAdapter(MainActivity.this, R.layout.list_item, applications.getApplications());
+            listApps.setAdapter(feedAdapter);
         }
 
         private String downloadXML(String urlPath) {
