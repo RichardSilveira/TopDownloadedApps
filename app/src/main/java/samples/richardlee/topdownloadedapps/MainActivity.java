@@ -4,6 +4,8 @@ import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.ListView;
 
 import java.io.BufferedReader;
@@ -18,17 +20,68 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     private ListView listApps;
 
+    private String feedUrl = "http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/topfreeapplications/limit=%d/xml";
+    private int feedLimit = 10;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         listApps = (ListView) findViewById(R.id.xmlListView);
-        DownloadFeed downloadFeed = new DownloadFeed();
-        downloadFeed.execute("http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/topfreeapplications/limit=200/xml");
+        downloadFeedUrl(String.format(feedUrl, feedLimit));
     }
 
-        private class DownloadFeed extends AsyncTask<String, Void, String> {
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.feeds_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        int itemID = item.getItemId();
+
+        switch (itemID) {
+            case R.id.mnuFree:
+                feedUrl = "http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/topfreeapplications/limit=%d/xml";
+                break;
+            case R.id.mnuPaid:
+                feedUrl = "http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/toppaidapplications/limit=%d/xml";
+                break;
+            case R.id.mnuSongs:
+                feedUrl = "http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/topsongs/limit=%d/xml";
+                break;
+            case R.id.mnu10:
+                if (!item.isChecked()) {
+                    item.setChecked(true);
+                    feedLimit = 10;
+                }
+                break;
+            case R.id.mnu25:
+                if (!item.isChecked()) {
+                    item.setChecked(true);
+                    feedLimit = 25;
+                }
+                break;
+
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+
+        downloadFeedUrl(String.format(feedUrl, feedLimit));
+
+        return true;
+    }
+
+    private void downloadFeedUrl(String feedsUrl) {
+        DownloadFeed downloadFeed = new DownloadFeed();
+        downloadFeed.execute(feedsUrl);
+    }
+
+    private class DownloadFeed extends AsyncTask<String, Void, String> {
 
         @Override
         protected String doInBackground(String... strings) {
