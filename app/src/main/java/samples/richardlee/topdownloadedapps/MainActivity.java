@@ -23,18 +23,41 @@ public class MainActivity extends AppCompatActivity {
     private String feedUrl = "http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/topfreeapplications/limit=%d/xml";
     private int feedLimit = 10;
 
+    private static final String FEED_LIMIT = "FeedLimit";
+    private static final String FEED_URL = "FeedURL";
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        if(savedInstanceState != null){
+            feedLimit = savedInstanceState.getInt(FEED_LIMIT);
+            feedUrl = savedInstanceState.getString(FEED_URL);
+        }
 
         listApps = (ListView) findViewById(R.id.xmlListView);
         downloadFeedUrl(String.format(feedUrl, feedLimit));
     }
 
     @Override
+    protected void onSaveInstanceState(Bundle outState) {
+
+        outState.putInt(FEED_LIMIT, feedLimit);
+        outState.putString(FEED_URL, feedUrl);
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.feeds_menu, menu);
+
+        if (feedLimit == 10) {
+            menu.findItem(R.id.mnu10).setChecked(true);
+        } else {
+            menu.findItem(R.id.mnu25).setChecked(true);
+        }
+
         return true;
     }
 
